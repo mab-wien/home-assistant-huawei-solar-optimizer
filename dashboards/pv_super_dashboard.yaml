@@ -1,0 +1,706 @@
+button_card_templates:
+  pv_module_status:
+    show_icon: false
+    show_state: true
+    tap_action:
+      action: more-info
+    styles:
+      card:
+        - padding: 14px
+        - height: 142px
+        - border-radius: 16px
+        - background: rgba(10,40,90,0.92)
+        - color: white
+        - box-sizing: border-box
+      grid:
+        - grid-template-areas: '"n dot" "s s" "volt volt" "temp temp" "energy energy"'
+        - grid-template-columns: 1fr min-content
+        - grid-template-rows: min-content min-content min-content min-content min-content
+      name:
+        - justify-self: start
+        - align-self: start
+        - font-weight: bold
+        - font-size: 14px
+        - line-height: 1.1
+      state:
+        - justify-self: start
+        - align-self: start
+        - font-size: 24px
+        - font-weight: 700
+        - line-height: 1.1
+      custom_fields:
+        dot:
+          - justify-self: end
+          - align-self: start
+          - font-size: 12px
+        volt:
+          - justify-self: start
+          - font-size: 15px
+          - opacity: 0.88
+        temp:
+          - justify-self: start
+          - font-size: 15px
+          - opacity: 0.88
+        energy:
+          - justify-self: start
+          - font-size: 11px
+          - opacity: 0.55
+    custom_fields:
+      dot: |
+        [[[
+          const base = entity.entity_id.replace('_ausgangsleistung','');
+          const alarm = (states[base + '_alarm']?.state ?? '').toString().toLowerCase();
+          const status = (states[base + '_betriebsstatus']?.state ?? '').toString().toLowerCase();
+          if (alarm && alarm !== '0' && alarm !== 'normal' && alarm !== 'none' && alarm !== 'kein alarm') return '<span style="color:#ff5f57">●</span>';
+          if (status && status !== 'normal' && status !== 'running' && status !== 'betrieb' && status !== 'online') return '<span style="color:#f4c542">●</span>';
+          return '<span style="color:#55d66b">●</span>';
+        ]]]
+      volt: |
+        [[[
+          const base = entity.entity_id.replace('_ausgangsleistung','');
+          return (states[base + '_ausgangsspannung']?.state ?? '-') + ' V';
+        ]]]
+      temp: |
+        [[[
+          const base = entity.entity_id.replace('_ausgangsleistung','');
+          return (states[base + '_temperatur']?.state ?? '-') + ' °C';
+        ]]]
+      energy: |
+        [[[
+          const base = entity.entity_id.replace('_ausgangsleistung','');
+          return (states[base + '_energie']?.state ?? '-') + ' kWh';
+        ]]]
+  pv_heatmap_pro:
+    show_icon: false
+    show_state: true
+    tap_action:
+      action: more-info
+    styles:
+      card:
+        - padding: 10px
+        - height: 126px
+        - border-radius: 14px
+        - color: white
+      grid:
+        - grid-template-areas: '"n dot warn" "s s s" "eff eff eff" "delta delta delta"'
+        - grid-template-columns: 1fr min-content min-content
+        - grid-template-rows: min-content min-content min-content min-content
+      name:
+        - justify-self: start
+        - font-weight: bold
+        - font-size: 14px
+      state:
+        - justify-self: start
+        - font-size: 24px
+        - font-weight: 700
+      custom_fields:
+        dot:
+          - justify-self: end
+          - font-size: 12px
+        warn:
+          - justify-self: end
+          - font-size: 12px
+        eff:
+          - justify-self: start
+          - font-size: 12px
+          - opacity: 0.92
+        delta:
+          - justify-self: start
+          - font-size: 11px
+          - opacity: 0.78
+    custom_fields:
+      dot: |
+        [[[
+          const worst = states[variables.worst_label_entity]?.state ?? '';
+          return worst === variables.module_label ? '<span style="color:#ff5f57">●</span>' : '<span style="color:#55d66b">●</span>';
+        ]]]
+      warn: |
+        [[[
+          const t = Number(states[variables.temp_delta_entity]?.state ?? 0);
+          return t >= 25 ? '<span style="color:#ffb020">⚠</span>' : '';
+        ]]]
+      eff: |
+        [[[
+          const v = Number(states[variables.perf_entity]?.state ?? 0);
+          return 'Eff ' + (v ? v.toFixed(1) : '-') + ' %';
+        ]]]
+      delta: |
+        [[[
+          const avg = Number(states[variables.row_avg_entity]?.state ?? 0);
+          const cur = Number(states[variables.perf_entity]?.state ?? 0);
+          if (!avg || !cur) return 'Δ -';
+          const d = ((cur / avg) * 100) - 100;
+          return 'Δ ' + (d > 0 ? '+' : '') + d.toFixed(0) + ' %';
+        ]]]
+    state:
+      - operator: template
+        value: >
+          [[[ const avg = Number(states[variables.row_avg_entity]?.state ?? 0);
+          const cur = Number(states[variables.perf_entity]?.state ?? 0); return
+          avg && cur && cur < avg * 0.75; ]]]
+        styles:
+          card:
+            - background: rgba(180,40,40,0.92)
+            - border: 2px solid rgba(255,255,255,0.15)
+      - operator: template
+        value: >
+          [[[ const avg = Number(states[variables.row_avg_entity]?.state ?? 0);
+          const cur = Number(states[variables.perf_entity]?.state ?? 0); return
+          avg && cur && cur >= avg * 0.75 && cur < avg * 0.9; ]]]
+        styles:
+          card:
+            - background: rgba(201,132,39,0.92)
+            - border: 2px solid rgba(255,255,255,0.12)
+      - operator: template
+        value: >
+          [[[ const avg = Number(states[variables.row_avg_entity]?.state ?? 0);
+          const cur = Number(states[variables.perf_entity]?.state ?? 0); return
+          avg && cur && cur >= avg * 0.9; ]]]
+        styles:
+          card:
+            - background: rgba(25,84,155,0.96)
+            - border: 2px solid rgba(255,255,255,0.08)
+views:
+  - title: PV Module
+    path: pv-module
+    icon: mdi:solar-panel-large
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr
+      grid-template-rows: auto auto auto auto
+      grid-template-areas: |
+        "header"
+        "row1"
+        "row2"
+        "row3"
+    cards:
+      - type: markdown
+        view_layout:
+          grid-area: header
+        content: >
+          ## PV Modulübersicht
+
+          Leistung / Spannung / Temperatur / Total energy je Modul in realer
+          Reihenfolge
+      - type: horizontal-stack
+        view_layout:
+          grid-area: row1
+        cards:
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.7
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.11
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.10
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.13
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.5
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.4
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.10
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.7
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.9
+      - type: horizontal-stack
+        view_layout:
+          grid-area: row2
+        cards:
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.3
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.12
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.9
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.4
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.3
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.2
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.8
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.6
+      - type: horizontal-stack
+        view_layout:
+          grid-area: row3
+        cards:
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.2
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.6
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.8
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.1
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.12
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.11
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.5
+          - type: custom:button-card
+            template: pv_module_status
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.1
+  - title: PV Diagnose
+    path: pv-diagnose
+    icon: mdi:solar-power-variant
+    cards:
+      - type: markdown
+        content: >
+          ## PV Diagnose
+
+          Vergleich von Einstrahlung, Modulleistung, Effizienz und
+          Temperaturdifferenz.
+      - type: grid
+        columns: 4
+        square: false
+        cards:
+          - type: entity
+            entity: sensor.ecowitt_solar_radiation_10XXX
+            name: Einstrahlung
+          - type: entity
+            entity: sensor.ecowitt_outdoor_temp_10XXX
+            name: Außentemperatur
+          - type: entity
+            entity: sensor.pv_expected_module_power_flat_ref
+            name: Referenz-Modulleistung
+          - type: entity
+            entity: sensor.pv_row_1_1_average_power_fixed
+            name: Ø Leistung Reihe 1.1
+          - type: entity
+            entity: sensor.pv_row_1_2_average_power_fixed
+            name: Ø Leistung Reihe 1.2
+          - type: entity
+            entity: sensor.pv_row_1_1_average_performance_fixed
+            name: Ø Effizienz Reihe 1.1
+          - type: entity
+            entity: sensor.pv_row_1_2_average_performance_fixed
+            name: Ø Effizienz Reihe 1.2
+          - type: entity
+            entity: sensor.pv_module_1_1_7_temp_delta
+            name: ΔT Beispiel 1.1.7
+      - type: horizontal-stack
+        cards:
+          - type: entities
+            title: Schwächstes Modul Reihe 1.1
+            entities:
+              - entity: sensor.pv_row_1_1_worst_module_label_fixed
+                name: Modul
+              - entity: sensor.pv_row_1_1_worst_module_performance_fixed
+                name: Effizienz
+              - entity: sensor.pv_row_1_1_average_performance_fixed
+                name: Reihe Ø Effizienz
+          - type: entities
+            title: Schwächstes Modul Reihe 1.2
+            entities:
+              - entity: sensor.pv_row_1_2_worst_module_label_fixed
+                name: Modul
+              - entity: sensor.pv_row_1_2_worst_module_performance_fixed
+                name: Effizienz
+              - entity: sensor.pv_row_1_2_average_performance_fixed
+                name: Reihe Ø Effizienz
+      - type: history-graph
+        title: Einstrahlung vs Referenz-Modulleistung
+        hours_to_show: 12
+        entities:
+          - entity: sensor.ecowitt_solar_radiation_10XXX
+            name: Einstrahlung
+          - entity: sensor.pv_expected_module_power_flat_ref
+            name: Referenz-Modulleistung
+      - type: entities
+        title: Beispielmodul 1.1.7
+        entities:
+          - entity: sensor.jv123456789_ausgangsleistung
+            name: Aktuelle Leistung
+          - entity: sensor.jv123456789_ausgangsspannung
+            name: Spannung
+          - entity: sensor.jv123456789_temperatur
+            name: Modultemperatur
+          - entity: sensor.pv_module_1_1_7_expected_power
+            name: Erwartete Leistung
+          - entity: sensor.pv_module_1_1_7_performance
+            name: Effizienz / Performance
+          - entity: sensor.pv_module_1_1_7_temp_delta
+            name: ΔT
+      - type: markdown
+        content: >
+          **Interpretation**
+
+          - Performance deutlich unter dem Reihenmittel kann auf Verschattung,
+          Verschmutzung oder einen Optimierer-/Modulfehler hindeuten.
+
+          - ΔT stark erhöht kann auf hohe Einstrahlung oder thermische
+          Auffälligkeiten hinweisen.
+
+          - Werte über 100 % Performance sind möglich, weil dein Ecowitt-Sensor
+          horizontal misst, die Module aber geneigt sind.
+  - title: PV Heatmap
+    path: pv-heatmap
+    icon: mdi:solar-panel-large
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr
+      grid-template-rows: auto auto auto auto
+      grid-template-areas: |
+        "header"
+        "row1"
+        "row2"
+        "row3"
+    cards:
+      - type: markdown
+        view_layout:
+          grid-area: header
+        content: |
+          ## PV Heatmap Pro
+          - 🔴 roter Punkt = schwächstes Modul der jeweiligen Reihe
+          - ⚠ = erhöhte Temperaturdifferenz
+          - Blau = mindestens 90 % vom Reihenmittel
+          - Orange = 75–90 % vom Reihenmittel
+          - Rot = unter 75 % vom Reihenmittel
+      - type: horizontal-stack
+        view_layout:
+          grid-area: row1
+        cards:
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.7
+            variables:
+              module_label: 1.1.7
+              perf_entity: sensor.pv_module_1_1_7_performance
+              temp_delta_entity: sensor.pv_module_1_1_7_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.11
+            variables:
+              module_label: 1.1.11
+              perf_entity: sensor.pv_module_1_1_11_performance
+              temp_delta_entity: sensor.pv_module_1_1_11_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.10
+            variables:
+              module_label: 1.1.10
+              perf_entity: sensor.pv_module_1_1_10_performance
+              temp_delta_entity: sensor.pv_module_1_1_10_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.13
+            variables:
+              module_label: 1.1.13
+              perf_entity: sensor.pv_module_1_1_13_performance
+              temp_delta_entity: sensor.pv_module_1_1_13_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.5
+            variables:
+              module_label: 1.1.5
+              perf_entity: sensor.pv_module_1_1_5_performance
+              temp_delta_entity: sensor.pv_module_1_1_5_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.4
+            variables:
+              module_label: 1.2.4
+              perf_entity: sensor.pv_module_1_2_4_performance
+              temp_delta_entity: sensor.pv_module_1_2_4_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.10
+            variables:
+              module_label: 1.2.10
+              perf_entity: sensor.pv_module_1_2_10_performance
+              temp_delta_entity: sensor.pv_module_1_2_10_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.7
+            variables:
+              module_label: 1.2.7
+              perf_entity: sensor.pv_module_1_2_7_performance
+              temp_delta_entity: sensor.pv_module_1_2_7_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.9
+            variables:
+              module_label: 1.2.9
+              perf_entity: sensor.pv_module_1_2_9_performance
+              temp_delta_entity: sensor.pv_module_1_2_9_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+      - type: horizontal-stack
+        view_layout:
+          grid-area: row2
+        cards:
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.3
+            variables:
+              module_label: 1.1.3
+              perf_entity: sensor.pv_module_1_1_3_performance
+              temp_delta_entity: sensor.pv_module_1_1_3_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.12
+            variables:
+              module_label: 1.1.12
+              perf_entity: sensor.pv_module_1_1_12_performance
+              temp_delta_entity: sensor.pv_module_1_1_12_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.9
+            variables:
+              module_label: 1.1.9
+              perf_entity: sensor.pv_module_1_1_9_performance
+              temp_delta_entity: sensor.pv_module_1_1_9_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.4
+            variables:
+              module_label: 1.1.4
+              perf_entity: sensor.pv_module_1_1_4_performance
+              temp_delta_entity: sensor.pv_module_1_1_4_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.3
+            variables:
+              module_label: 1.2.3
+              perf_entity: sensor.pv_module_1_2_3_performance
+              temp_delta_entity: sensor.pv_module_1_2_3_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.2
+            variables:
+              module_label: 1.2.2
+              perf_entity: sensor.pv_module_1_2_2_performance
+              temp_delta_entity: sensor.pv_module_1_2_2_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.8
+            variables:
+              module_label: 1.2.8
+              perf_entity: sensor.pv_module_1_2_8_performance
+              temp_delta_entity: sensor.pv_module_1_2_8_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.6
+            variables:
+              module_label: 1.2.6
+              perf_entity: sensor.pv_module_1_2_6_performance
+              temp_delta_entity: sensor.pv_module_1_2_6_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+      - type: horizontal-stack
+        view_layout:
+          grid-area: row3
+        cards:
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.2
+            variables:
+              module_label: 1.1.2
+              perf_entity: sensor.pv_module_1_1_2_performance
+              temp_delta_entity: sensor.pv_module_1_1_2_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.6
+            variables:
+              module_label: 1.1.6
+              perf_entity: sensor.pv_module_1_1_6_performance
+              temp_delta_entity: sensor.pv_module_1_1_6_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.8
+            variables:
+              module_label: 1.1.8
+              perf_entity: sensor.pv_module_1_1_8_performance
+              temp_delta_entity: sensor.pv_module_1_1_8_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            color_type: blank-card
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.1.1
+            variables:
+              module_label: 1.1.1
+              perf_entity: sensor.pv_module_1_1_1_performance
+              temp_delta_entity: sensor.pv_module_1_1_1_temp_delta
+              row_avg_entity: sensor.pv_row_1_1_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_1_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.12
+            variables:
+              module_label: 1.2.12
+              perf_entity: sensor.pv_module_1_2_12_performance
+              temp_delta_entity: sensor.pv_module_1_2_12_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.11
+            variables:
+              module_label: 1.2.11
+              perf_entity: sensor.pv_module_1_2_11_performance
+              temp_delta_entity: sensor.pv_module_1_2_11_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.5
+            variables:
+              module_label: 1.2.5
+              perf_entity: sensor.pv_module_1_2_5_performance
+              temp_delta_entity: sensor.pv_module_1_2_5_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
+          - type: custom:button-card
+            template: pv_heatmap_pro
+            entity: sensor.jv123456789_ausgangsleistung
+            name: 1.2.1
+            variables:
+              module_label: 1.2.1
+              perf_entity: sensor.pv_module_1_2_1_performance
+              temp_delta_entity: sensor.pv_module_1_2_1_temp_delta
+              row_avg_entity: sensor.pv_row_1_2_average_performance_fixed
+              worst_label_entity: sensor.pv_row_1_2_worst_module_label_fixed
