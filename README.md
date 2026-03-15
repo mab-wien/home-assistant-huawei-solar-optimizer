@@ -114,8 +114,13 @@ MIT License
 
 ## Screenshots
 
-Add screenshots of your dashboards here:
-- Module layout
-- Heatmap view
-- Diagnostic dashboard
-- PV Pro analytics
+### Module Layout
+![Modules](pv_dashboard_modules.png)
+
+### Heatmap
+![Heatmap](pv_dashboard_heatmap.png)
+
+### Diagnostics
+![Diagnostics](pv_dashboard_diagnostics.png)
+
+### PV Pro Monitoring
