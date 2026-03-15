@@ -1,0 +1,1370 @@
+# All-in-one PV Super Package
+# Contains module analysis sensors and super dashboard aggregate sensors
+
+template:
+  - sensor:
+      - name: pv_module_model_area
+        unique_id: pv_module_model_area
+        unit_of_measurement: "mÂ²"
+        state: '1.998108'
+
+      - name: pv_module_model_efficiency_stc
+        unique_id: pv_module_model_efficiency_stc
+        unit_of_measurement: "%"
+        state: '22.3'
+
+      - name: pv_module_model_temp_coeff_power
+        unique_id: pv_module_model_temp_coeff_power
+        unit_of_measurement: "%/Â°C"
+        state: '-0.30'
+
+      - name: pv_expected_module_power_flat_ref
+        unique_id: pv_expected_module_power_flat_ref
+        unit_of_measurement: "W"
+        icon: mdi:solar-power
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set ambient = states('sensor.ecowitt_outdoor_temp_10XXX') | float(25) %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (ambient - 25) %}
+          {{ (rad * area * eta * temp_factor) | round(1) }}
+        attributes:
+          note: 'Referenzwert mit horizontaler Einstrahlung und AuÃŸentemperatur; dient als Vergleich, nicht als exakter Sollwert.'
+
+      - name: pv_module_1_1_7_expected_power
+        unique_id: pv_module_1_1_7_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.7'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_7_performance
+        unique_id: pv_module_1_1_7_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_7_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_7_temp_delta
+        unique_id: pv_module_1_1_7_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_11_expected_power
+        unique_id: pv_module_1_1_11_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.11'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_11_performance
+        unique_id: pv_module_1_1_11_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_11_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_11_temp_delta
+        unique_id: pv_module_1_1_11_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_10_expected_power
+        unique_id: pv_module_1_1_10_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.10'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_10_performance
+        unique_id: pv_module_1_1_10_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_10_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_10_temp_delta
+        unique_id: pv_module_1_1_10_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_13_expected_power
+        unique_id: pv_module_1_1_13_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.13'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_13_performance
+        unique_id: pv_module_1_1_13_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_13_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_13_temp_delta
+        unique_id: pv_module_1_1_13_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_5_expected_power
+        unique_id: pv_module_1_1_5_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.5'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_5_performance
+        unique_id: pv_module_1_1_5_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_5_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_5_temp_delta
+        unique_id: pv_module_1_1_5_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_4_expected_power
+        unique_id: pv_module_1_2_4_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.4'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_4_performance
+        unique_id: pv_module_1_2_4_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_4_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_4_temp_delta
+        unique_id: pv_module_1_2_4_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_10_expected_power
+        unique_id: pv_module_1_2_10_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.10'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_10_performance
+        unique_id: pv_module_1_2_10_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_10_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_10_temp_delta
+        unique_id: pv_module_1_2_10_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_7_expected_power
+        unique_id: pv_module_1_2_7_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.7'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_7_performance
+        unique_id: pv_module_1_2_7_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_7_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_7_temp_delta
+        unique_id: pv_module_1_2_7_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_9_expected_power
+        unique_id: pv_module_1_2_9_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.9'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_9_performance
+        unique_id: pv_module_1_2_9_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_9_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_9_temp_delta
+        unique_id: pv_module_1_2_9_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_3_expected_power
+        unique_id: pv_module_1_1_3_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.3'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_3_performance
+        unique_id: pv_module_1_1_3_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_3_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_3_temp_delta
+        unique_id: pv_module_1_1_3_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_12_expected_power
+        unique_id: pv_module_1_1_12_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.12'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_12_performance
+        unique_id: pv_module_1_1_12_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_12_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_12_temp_delta
+        unique_id: pv_module_1_1_12_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_9_expected_power
+        unique_id: pv_module_1_1_9_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.9'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_9_performance
+        unique_id: pv_module_1_1_9_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_9_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_9_temp_delta
+        unique_id: pv_module_1_1_9_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_4_expected_power
+        unique_id: pv_module_1_1_4_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.4'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_4_performance
+        unique_id: pv_module_1_1_4_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_4_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_4_temp_delta
+        unique_id: pv_module_1_1_4_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_3_expected_power
+        unique_id: pv_module_1_2_3_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.3'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_3_performance
+        unique_id: pv_module_1_2_3_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_3_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_3_temp_delta
+        unique_id: pv_module_1_2_3_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_2_expected_power
+        unique_id: pv_module_1_2_2_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.2'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_2_performance
+        unique_id: pv_module_1_2_2_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_2_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_2_temp_delta
+        unique_id: pv_module_1_2_2_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_8_expected_power
+        unique_id: pv_module_1_2_8_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.8'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_8_performance
+        unique_id: pv_module_1_2_8_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_8_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_8_temp_delta
+        unique_id: pv_module_1_2_8_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_6_expected_power
+        unique_id: pv_module_1_2_6_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.6'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_6_performance
+        unique_id: pv_module_1_2_6_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_6_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_6_temp_delta
+        unique_id: pv_module_1_2_6_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_2_expected_power
+        unique_id: pv_module_1_1_2_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.2'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_2_performance
+        unique_id: pv_module_1_1_2_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_2_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_2_temp_delta
+        unique_id: pv_module_1_1_2_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_6_expected_power
+        unique_id: pv_module_1_1_6_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.6'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_6_performance
+        unique_id: pv_module_1_1_6_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_6_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_6_temp_delta
+        unique_id: pv_module_1_1_6_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_8_expected_power
+        unique_id: pv_module_1_1_8_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.8'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_8_performance
+        unique_id: pv_module_1_1_8_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_8_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_8_temp_delta
+        unique_id: pv_module_1_1_8_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_1_1_expected_power
+        unique_id: pv_module_1_1_1_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.1.1'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_1_1_performance
+        unique_id: pv_module_1_1_1_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_1_1_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_1_1_temp_delta
+        unique_id: pv_module_1_1_1_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_12_expected_power
+        unique_id: pv_module_1_2_12_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.12'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_12_performance
+        unique_id: pv_module_1_2_12_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_12_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_12_temp_delta
+        unique_id: pv_module_1_2_12_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_11_expected_power
+        unique_id: pv_module_1_2_11_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.11'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_11_performance
+        unique_id: pv_module_1_2_11_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_11_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_11_temp_delta
+        unique_id: pv_module_1_2_11_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_5_expected_power
+        unique_id: pv_module_1_2_5_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.5'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_5_performance
+        unique_id: pv_module_1_2_5_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_5_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_5_temp_delta
+        unique_id: pv_module_1_2_5_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_module_1_2_1_expected_power
+        unique_id: pv_module_1_2_1_expected_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {% set rad = states('sensor.ecowitt_solar_radiation_10XXX') | float(0) %}
+          {% set module_temp = states('sensor.jv123456789_temperatur') | float(25) %}
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set area = 1.998108 %}
+          {% set eta = 0.223 %}
+          {% set coeff = -0.003 %}
+          {% set temp_factor = 1 + coeff * (module_temp - 25) %}
+          {% set expected = rad * area * eta * temp_factor %}
+          {{ [expected, 0] | max | round(1) }}
+        attributes:
+          module_label: '1.2.1'
+          actual_power_w: "{{ states('sensor.jv123456789_ausgangsleistung') }}"
+
+      - name: pv_module_1_2_1_performance
+        unique_id: pv_module_1_2_1_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set actual = states('sensor.jv123456789_ausgangsleistung') | float(0) %}
+          {% set expected = states('sensor.pv_module_1_2_1_expected_power') | float(0) %}
+          {% if expected > 0 %}
+            {{ ((actual / expected) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          note: 'Werte Ã¼ber 100 % sind mÃ¶glich, weil der Ecowitt-Sensor horizontal misst und das Modul geneigt ist.'
+
+      - name: pv_module_1_2_1_temp_delta
+        unique_id: pv_module_1_2_1_temp_delta
+        unit_of_measurement: "Â°C"
+        icon: mdi:thermometer-chevron-up
+        state: >
+          {{ (states('sensor.jv123456789_10XXX') | float(0)) | round(1) }}
+
+      - name: pv_row_1_1_average_power
+        unique_id: pv_row_1_1_average_power
+        unit_of_measurement: "W"
+        state: >
+          {% set vals = [states('sensor.jv123456789_ausgangsleistung') | float(0)] %}
+          {% set ns = namespace(total=0, count=0) %}
+          {% for v in vals %}
+            {% if v > 0 %}
+              {% set ns.total = ns.total + v %}
+              {% set ns.count = ns.count + 1 %}
+            {% endif %}
+          {% endfor %}
+          {% if ns.count > 0 %}{{ (ns.total / ns.count) | round(1) }}{% else %}0{% endif %}
+
+      - name: pv_row_1_2_average_power
+        unique_id: pv_row_1_2_average_power
+        unit_of_measurement: "W"
+        state: >
+          {% set vals = [states('sensor.jv123456789_ausgangsleistung') | float(0)] %}
+          {% set ns = namespace(total=0, count=0) %}
+          {% for v in vals %}
+            {% if v > 0 %}
+              {% set ns.total = ns.total + v %}
+              {% set ns.count = ns.count + 1 %}
+            {% endif %}
+          {% endfor %}
+          {% if ns.count > 0 %}{{ (ns.total / ns.count) | round(1) }}{% else %}0{% endif %}
+      - name: pv_total_module_power
+        unique_id: pv_total_module_power
+        unit_of_measurement: "W"
+        icon: mdi:solar-power
+        state: >
+          {{ ((states('sensor.jv123456789_ausgangsleistung') | float(0))) | round(1) }}
+
+      - name: pv_total_module_energy
+        unique_id: pv_total_module_energy
+        unit_of_measurement: "kWh"
+        icon: mdi:counter
+        state: >
+          {{ ((states('sensor.jv123456789_energie') | float(0))) | round(1) }}
+
+      - name: pv_expected_total_power
+        unique_id: pv_expected_total_power
+        unit_of_measurement: "W"
+        icon: mdi:chart-bell-curve
+        state: >
+          {{ ((states('sensor.pv_module_1_1_1_expected_power') | float(0)) + (states('sensor.pv_module_1_1_2_expected_power') | float(0)) + (states('sensor.pv_module_1_1_3_expected_power') | float(0)) + (states('sensor.pv_module_1_1_4_expected_power') | float(0)) + (states('sensor.pv_module_1_1_5_expected_power') | float(0)) + (states('sensor.pv_module_1_1_6_expected_power') | float(0)) + (states('sensor.pv_module_1_1_7_expected_power') | float(0)) + (states('sensor.pv_module_1_1_8_expected_power') | float(0)) + (states('sensor.pv_module_1_1_9_expected_power') | float(0)) + (states('sensor.pv_module_1_1_10_expected_power') | float(0)) + (states('sensor.pv_module_1_1_11_expected_power') | float(0)) + (states('sensor.pv_module_1_1_12_expected_power') | float(0)) + (states('sensor.pv_module_1_1_13_expected_power') | float(0)) + (states('sensor.pv_module_1_2_1_expected_power') | float(0)) + (states('sensor.pv_module_1_2_2_expected_power') | float(0)) + (states('sensor.pv_module_1_2_3_expected_power') | float(0)) + (states('sensor.pv_module_1_2_4_expected_power') | float(0)) + (states('sensor.pv_module_1_2_5_expected_power') | float(0)) + (states('sensor.pv_module_1_2_6_expected_power') | float(0)) + (states('sensor.pv_module_1_2_7_expected_power') | float(0)) + (states('sensor.pv_module_1_2_8_expected_power') | float(0)) + (states('sensor.pv_module_1_2_9_expected_power') | float(0)) + (states('sensor.pv_module_1_2_10_expected_power') | float(0)) + (states('sensor.pv_module_1_2_11_expected_power') | float(0)) + (states('sensor.pv_module_1_2_12_expected_power') | float(0))) | round(1) }}
+
+      - name: pv_system_performance
+        unique_id: pv_system_performance
+        unit_of_measurement: "%"
+        icon: mdi:speedometer
+        state: >
+          {% set real = states('sensor.pv_total_module_power') | float(0) %}
+          {% set exp = states('sensor.pv_expected_total_power') | float(0) %}
+          {% if exp > 0 %}
+            {{ ((real / exp) * 100) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: pv_row_1_1_average_performance_fixed
+        unique_id: pv_row_1_1_average_performance_fixed
+        unit_of_measurement: "%"
+        state: >
+          {% set vals = [states('sensor.pv_module_1_1_1_performance') | float(0), states('sensor.pv_module_1_1_2_performance') | float(0), states('sensor.pv_module_1_1_3_performance') | float(0), states('sensor.pv_module_1_1_4_performance') | float(0), states('sensor.pv_module_1_1_5_performance') | float(0), states('sensor.pv_module_1_1_6_performance') | float(0), states('sensor.pv_module_1_1_7_performance') | float(0), states('sensor.pv_module_1_1_8_performance') | float(0), states('sensor.pv_module_1_1_9_performance') | float(0), states('sensor.pv_module_1_1_10_performance') | float(0), states('sensor.pv_module_1_1_11_performance') | float(0), states('sensor.pv_module_1_1_12_performance') | float(0), states('sensor.pv_module_1_1_13_performance') | float(0)] %}
+          {% set real = vals | select('gt', 0) | list %}
+          {% if real | count > 0 %}
+            {{ (real | sum / (real | count)) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: pv_row_1_2_average_performance_fixed
+        unique_id: pv_row_1_2_average_performance_fixed
+        unit_of_measurement: "%"
+        state: >
+          {% set vals = [states('sensor.pv_module_1_2_1_performance') | float(0), states('sensor.pv_module_1_2_2_performance') | float(0), states('sensor.pv_module_1_2_3_performance') | float(0), states('sensor.pv_module_1_2_4_performance') | float(0), states('sensor.pv_module_1_2_5_performance') | float(0), states('sensor.pv_module_1_2_6_performance') | float(0), states('sensor.pv_module_1_2_7_performance') | float(0), states('sensor.pv_module_1_2_8_performance') | float(0), states('sensor.pv_module_1_2_9_performance') | float(0), states('sensor.pv_module_1_2_10_performance') | float(0), states('sensor.pv_module_1_2_11_performance') | float(0), states('sensor.pv_module_1_2_12_performance') | float(0)] %}
+          {% set real = vals | select('gt', 0) | list %}
+          {% if real | count > 0 %}
+            {{ (real | sum / (real | count)) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: pv_row_1_1_average_power_fixed
+        unique_id: pv_row_1_1_average_power_fixed
+        unit_of_measurement: "W"
+        state: >
+          {% set vals = [states('sensor.jv123456789_ausgangsleistung') | float(0)] %}
+          {% set real = vals | select('gt', 0) | list %}
+          {% if real | count > 0 %}
+            {{ (real | sum / (real | count)) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: pv_row_1_2_average_power_fixed
+        unique_id: pv_row_1_2_average_power_fixed
+        unit_of_measurement: "W"
+        state: >
+          {% set vals = [states('sensor.jv123456789_ausgangsleistung') | float(0)] %}
+          {% set real = vals | select('gt', 0) | list %}
+          {% if real | count > 0 %}
+            {{ (real | sum / (real | count)) | round(1) }}
+          {% else %}
+            0
+          {% endif %}
+
+      - name: pv_row_1_1_worst_module_label_fixed
+        unique_id: pv_row_1_1_worst_module_label_fixed
+        state: >
+          {% set ns = namespace(best='-', val=999999) %}
+          {% set v = states('sensor.pv_module_1_1_1_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.1' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_2_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.2' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_3_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.3' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_4_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.4' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_5_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.5' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_6_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.6' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_7_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.7' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_8_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.8' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_9_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.9' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_10_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.10' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_11_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.11' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_12_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.12' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_13_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.1.13' %}
+          {% endif %}
+          {{ ns.best }}
+
+      - name: pv_row_1_1_worst_module_performance_fixed
+        unique_id: pv_row_1_1_worst_module_performance_fixed
+        unit_of_measurement: "%"
+        state: >
+          {% set ns = namespace(val=999999) %}
+          {% set v = states('sensor.pv_module_1_1_1_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_2_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_3_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_4_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_5_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_6_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_7_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_8_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_9_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_10_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_11_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_12_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_1_13_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {{ (0 if ns.val == 999999 else ns.val) | round(1) }}
+
+
+      - name: pv_row_1_2_worst_module_label_fixed
+        unique_id: pv_row_1_2_worst_module_label_fixed
+        state: >
+          {% set ns = namespace(best='-', val=999999) %}
+          {% set v = states('sensor.pv_module_1_2_1_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.1' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_2_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.2' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_3_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.3' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_4_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.4' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_5_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.5' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_6_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.6' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_7_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.7' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_8_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.8' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_9_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.9' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_10_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.10' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_11_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.11' %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_12_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}{% set ns.best = '1.2.12' %}
+          {% endif %}
+          {{ ns.best }}
+
+      - name: pv_row_1_2_worst_module_performance_fixed
+        unique_id: pv_row_1_2_worst_module_performance_fixed
+        unit_of_measurement: "%"
+        state: >
+          {% set ns = namespace(val=999999) %}
+          {% set v = states('sensor.pv_module_1_2_1_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_2_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_3_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_4_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_5_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_6_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_7_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_8_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_9_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_10_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_11_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {% set v = states('sensor.pv_module_1_2_12_performance') | float(999999) %}
+          {% if v > 0 and v < ns.val %}
+            {% set ns.val = v %}
+          {% endif %}
+          {{ (0 if ns.val == 999999 else ns.val) | round(1) }}
